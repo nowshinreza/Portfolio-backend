@@ -15,22 +15,21 @@ if (!process.env.MONGODB_URL) {
   process.exit(1);
 }
 
+// ✅ FIXED CORS
 const allowedOrigins = [
   "http://localhost:5173",
-  process.env.CLIENT_URL,
-].filter(Boolean);
+  "https://nowshin-reza-portfolio.vercel.app",
+];
 
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-      return callback(new Error(`CORS blocked for origin: ${origin}`));
-    },
+    origin: allowedOrigins,
     credentials: true,
   })
 );
+
+// ✅ VERY IMPORTANT (preflight)
+app.options("*", cors());
 
 app.use(express.json());
 app.use(cookieParser());
@@ -49,6 +48,7 @@ app.use("/api/portfolio", portfolioRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/upload", uploadRoutes);
 
+// error handler
 app.use((err, req, res, next) => {
   console.error("Server Error:", err.message);
 
